@@ -1,0 +1,30 @@
+crispy-form for styling form in django
+pip3 install django-crispy-forms
+
+for using image pillow is required
+pip3 install Pillow
+
+to create profile for every signed in user, we need django-signals
+@receiver(post_save, sender=User)
+def create_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+it means: when a User is saved, send a signal
+and, the signal is received by Receiver.
+this receiver is create_profile method.
+
+
+LoginRequiredMixin is used to provide/show the only when user is loged in
+otherwise it returns to Login Page
+
+Google App Password for Password reset functionality
+https://support.google.com/accounts/answer/185833?hl=en
+
+# put this in Settings.py
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_POST = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('DB_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('DB_PASS')
