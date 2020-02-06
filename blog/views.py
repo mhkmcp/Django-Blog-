@@ -13,6 +13,7 @@ from django.views.generic import (
 )
 
 from blog.models import Post
+# from blog.forms import CommentForm
 
 
 def home(request):
@@ -27,7 +28,9 @@ class PostListView(ListView):
     # by default django expect 'blog/post_list.html'
     template_name = 'blog/home.html'
     # by default django provide 'object_list' for posts
+    # form_class = CommentForm
     context_object_name = 'posts'
+
     # query
     ordering = ['-date_posted']
     paginate_by = 5
@@ -50,8 +53,8 @@ class PostDetailView(DetailView):
     model = Post
     template_name = 'blog/post_detail.html'
 
-    def get_object(self):
-        return Post.objects.get(id=id)
+    # def get_object(self):
+    #     return Post.objects.get(id=id)
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):

@@ -18,3 +18,14 @@ class Post(models.Model):
         return reverse('blog:post-detail', kwargs={'pk': self.pk})
 
 
+class Comment(models.Model):
+    post        = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user        = models.OneToOneField(User, on_delete=models.CASCADE)
+    content     = models.TextField()
+    active      = models.BooleanField(default=True)
+    updated_at  = models.DateTimeField(auto_now=True)
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.content
+
