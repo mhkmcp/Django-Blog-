@@ -10,11 +10,22 @@
       </div>
       <h2><a class="article-title" href="{% url 'blog:post-detail' post.id %}">{{ post.title }}</a></h2>
       <p class="article-content">{{ post.content }}</p>
-<!--        <form action="">-->
-<!--            {% csrf_token %}-->
-<!--            {{ form }}-->
-<!--            <button class="btn btn-sm btn-success" type="submit">Comment</button>-->
-<!--        </form>-->
+
+        {% for comment in post.comments.all %}
+            <div class="info">
+                <img class="rounded-circle article-img" src="{{ comment.author.profile.image.url }}" width="30px">
+                <a class="blue" href=""><span class="wall">{{ comment.author.username }} </span></a> {{ comment.content }}</div>
+
+        {% endfor %}
+
+        <form action="{% url 'blog:home' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="post_id" value="{{ post.id }}">
+<!--            <input type="hidden" name="author" value="{{ request.user }}">-->
+            {{ form }}
+<!--            <textarea name="content" id="" cols="30" rows="10"></textarea>-->
+            <button class="btn btn-sm btn-success" type="submit">Comment</button>
+        </form>
     </div>
   </article>
   {% endfor %}

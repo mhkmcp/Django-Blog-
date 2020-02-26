@@ -1,4 +1,5 @@
-from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import (
     LoginRequiredMixin,
@@ -12,8 +13,8 @@ from django.views.generic import (
     ListView
 )
 
-from blog.models import Post
-# from blog.forms import CommentForm
+from blog.models import Post, Comment
+from blog.forms import CommentForm
 
 
 def home(request):
@@ -23,17 +24,37 @@ def home(request):
     return render(request, 'blog/home.html', context=context)
 
 
-class PostListView(ListView):
-    model = Post
-    # by default django expect 'blog/post_list.html'
-    template_name = 'blog/home.html'
-    # by default django provide 'object_list' for posts
-    # form_class = CommentForm
-    context_object_name = 'posts'
+# class PostListView(ListView):
+#     model = Post
+#     # by default django expect 'blog/post_list.html'
+#     template_name = 'blog/home.html'
+#     # by default django provide 'object_list' for posts
+#     context_object_name = 'posts'
+#
+#     # query
+#     ordering = ['-date_posted']
+#     paginate_by = 5
 
-    # query
-    ordering = ['-date_posted']
-    paginate_by = 5
+def post_list(request):
+    posts = Post.objects.all().order_by('-date_posted')
+    form = CommentForm(request.POST or None)
+    paginator = Paginator(posts, 10)
+    context = {
+        'posts': posts,
+        'form': form,
+    }
+    if request.method == 'POST':
+        if form.is_valid():
+            instance = form.save(commit=False)
+
+            instance.post = get_object_or_404(Post, pk=int(request.POST.get('post_id')))
+            instance.author = request.user
+            instance.content = form.cleaned_data.get('content')
+            instance.save()
+
+            return redirect('blog:home')
+
+    return render(request, 'blog/home.html', context=context)
 
 
 class UserPostListView(ListView):
@@ -65,6 +86,20 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         # author for the post
         form.instance.author = self.request.user
+        return super().form_valid(form)
+
+
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    # fields with my view
+    fields = ['content']
+    success_url = 'blog:home'
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        post_id =form.cleaned_data.get('post_id')
+        form.instance.post = get_object_or_404(Post, id__iexact=post_id)
+        print(form.request.post.id)
         return super().form_valid(form)
 
 
